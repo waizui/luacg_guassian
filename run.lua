@@ -113,12 +113,10 @@ local function checkpixel(p, cov2d, ix, iy)
   local inv_det = 1 / det
 
   -- stylua: ignore
-  local inv_cov = {
+  local conic = matrix.new(2, 2, {
     inv_det * cov2d:get(1, 1), inv_det * cov2d:get(2, 1),
     inv_det * cov2d:get(1, 2), inv_det * cov2d:get(2, 2),
-  }
-
-  local conic = matrix.new(2, 2, table.unpack(inv_cov))
+  })
 
   local a, b, c = conic:get(1, 1), conic:get(1, 2), conic:get(2, 2)
   local dx, dy = ix - p[1], iy - p[2]
