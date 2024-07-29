@@ -199,23 +199,4 @@ local function begin(width, height, colorMode)
 end
 
 
-local function writebuf(buf, w, h, fname)
-  -- write to png
-  local png = begin(w, h)
-  for i = 1, w * h do
-    local v = buf[i]
-    if not v then
-      png:write({ 0, 0, 0 })
-    else
-      png:write({ math.floor(v[1] + 0.5), math.floor(v[2] + 0.5), math.floor(v[3] + 0.5) })
-    end
-  end
-
-  assert(png.done)
-  local pngbin = table.concat(png.output)
-  local file = assert(io.open(fname, "wb"))
-  file:write(pngbin)
-  file:close()
-end
-
-return begin, writebuf
+return begin
