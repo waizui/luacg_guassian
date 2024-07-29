@@ -138,8 +138,9 @@ local function checkpixel(p, cov2d, ix, iy)
     return true
   end
 
-  -- weight of this pixel
-  local w = math.exp(-v)
+
+  -- weight of this pixel for blurring
+  local w = math.exp(-v * v * v * 5)
 
   return false, w
 end
@@ -164,7 +165,7 @@ local function rasterizesplat(s, w, h)
         goto continue
       end
 
-      -- filtering
+      -- blending color
       local color = vector.new(3, 0x26, 0x6B, 0x56) * weight
       local bg = vector.new(3, 0xFF, 0xFF, 0xFF) * (1 - weight)
       color = color + bg
