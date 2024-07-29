@@ -104,7 +104,7 @@ local function checkpixel(p, cov2d, ix, iy)
   local x, y, z = cov2d:get(1, 1), cov2d:get(1, 2), cov2d:get(2, 2)
   local det = x * z - y * y
 
-  if ((det - 0) < 1e-6) then
+  if (math.abs(det - 0) < 1e-6) then
     return true
   end
 
