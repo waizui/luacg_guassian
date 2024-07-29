@@ -24,8 +24,18 @@ local function writebuf(buf, w, h, fname)
 end
 
 
+---@return Splat
 local function getgaussian()
+  ---@type Splat
   local s = splat.new()
+  s.scale = vector.new(3, 1, 0.5, 1)
+  local q = s.rotation
+  -- rotate 45 degree around z axis
+  q.r = 0.9238 -- cos(0)
+  q.i = 0
+  q.j = 0
+  q.k = 0.3826
+
   return s
 end
 
@@ -49,7 +59,7 @@ end
 
 
 ---@param s Splat
----@return Matrix
+---@return Matrix,Vector
 local function getcovariance2d(s)
   ---@type Camera
   local cam = camera.new()
@@ -73,6 +83,7 @@ local function getcovariance2d(s)
     0, 0, 0,
   }
 
+  -- jaccobian
   ---@type Matrix
   local J = matrix.new(3, 3, table.unpack(matj))
 
@@ -83,6 +94,7 @@ local function getcovariance2d(s)
     matvp:get(3, 1), matvp:get(3, 2), matvp:get(3, 3),
   }
 
+  -- view transformation
   ---@type Matrix
   local W = matrix.new(3, 3, table.unpack(matw))
 
@@ -92,11 +104,12 @@ local function getcovariance2d(s)
 
   local cov2d = T:transpose():mul(cov3d):mul(T)
 
-  return cov2d
+  return cov2d, viewpos
 end
 
+---@param p Vector
 ---@param cov2d Matrix
-local function checkdiscard(p, cov2d, ix, iy)
+local function checkpixel(p, cov2d, ix, iy)
   local x, y, z = cov2d:get(1, 1), cov2d:get(1, 2), cov2d:get(2, 2)
   local det = x * z - y * y
 
@@ -116,23 +129,26 @@ local function checkdiscard(p, cov2d, ix, iy)
 
   local conic = matrix.new(2, 2, table.unpack(inv_cov))
 
-  --test circle
-  -- local conic = matrix.new(2, 2, 2, 0, 0, 4)
-
   local a, b, c = conic:get(1, 1), conic:get(1, 2), conic:get(2, 2)
   local dx, dy = ix - p[1], iy - p[2]
   -- ellipse equation
   local v = a * dx * dx + 2 * b * dx * dy + c * dy * dy
 
-  return (v > 1)
-end
+  if v > 1 then
+    return true
+  end
 
+  -- weight of this pixel
+  local w = math.exp(-v)
+
+  return false, w
+end
 
 ---@param s Splat
 ---@return table
 local function rasterizesplat(s, w, h)
   local buf = {}
-  local cov2d = getcovariance2d(s)
+  local cov2d, mean = getcovariance2d(s)
 
   -- from top left corner to right bottom rasterize
   for i = h, 1, -1 do
@@ -140,13 +156,20 @@ local function rasterizesplat(s, w, h)
       local ix = (2 * (j - 1) + 1) / w - 1
       local iy = (2 * (i - 1) + 1) / h - 1
 
-      if checkdiscard({ 0, 0 }, cov2d, ix, iy) then
+      local discard, weight = checkpixel(mean, cov2d, ix, iy)
+
+      if discard then
         -- background color
         buf[(h - i) * w + j] = { 0xFF, 0xFF, 0xFF }
         goto continue
       end
 
-      buf[(h - i) * w + j] = { 0, 0xFF, 0xFF }
+      -- filtering
+      local color = vector.new(3, 0x26, 0x6B, 0x56) * weight
+      local bg = vector.new(3, 0xFF, 0xFF, 0xFF) * (1 - weight)
+      color = color + bg
+
+      buf[(h - i) * w + j] = { color[1], color[2], color[3] }
       ::continue::
     end
   end
@@ -155,7 +178,7 @@ end
 
 local function run()
   print("start")
-  local w, h = 64, 64
+  local w, h = 128, 128
   local s = getgaussian()
   local buf = rasterizesplat(s, w, h)
   writebuf(buf, w, h, "splatting.png")

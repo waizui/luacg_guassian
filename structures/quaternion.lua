@@ -34,8 +34,4 @@ function Quaternion:matrix()
 	return matrix.new(3, 3, table.unpack(mat))
 end
 
-function Quaternion:rotate(x, y, z) end
-
-function Quaternion:mul(q) end
-
 return Quaternion
