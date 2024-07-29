@@ -28,10 +28,11 @@ end
 local function getgaussian()
   ---@type Splat
   local s = splat.new()
+  s.position = vector.new(3, 0, 0, 0.3)
   s.scale = vector.new(3, 1, 0.5, 1)
   local q = s.rotation
   -- rotate 45 degree around z axis
-  q.r = 0.9238 -- cos(0)
+  q.r = 0.9238
   q.i = 0
   q.j = 0
   q.k = 0.3826
@@ -66,45 +67,35 @@ local function getcovariance2d(s)
   local matvp = cam.matrixVP
   local wordpos = s.position
   local viewpos = matvp:mul(vector.new(4, wordpos[1], wordpos[2], wordpos[3], 1))
-
-  -- perspective division
-  local w = viewpos[3]
-  viewpos = viewpos / w
-  viewpos[4] = w
+  -- no need for NDC?
 
   -- in the origin implement of 3D Gaussian-Splatting, there should be some criterion cchecking of bounds, but for demostration, it is omited.
 
   local focal, x, y, z = cam.near, viewpos[1], viewpos[2], viewpos[3]
 
   -- stylua: ignore
-  local matj = {
+  -- jaccobian
+  ---@type Matrix
+  local J = matrix.new(3, 3, {
     focal / z, 0, -(focal * x) / (z * z),
     0, focal / z, -(focal * y) / (z * z),
     0, 0, 0,
-  }
-
-  -- jaccobian
-  ---@type Matrix
-  local J = matrix.new(3, 3, table.unpack(matj))
+  })
 
   -- stylua: ignore
-  local matw = {
+  -- view transformation
+  ---@type Matrix
+  local W = matrix.new(3, 3, {
     matvp:get(1, 1), matvp:get(1, 2), matvp:get(1, 3),
     matvp:get(2, 1), matvp:get(2, 2), matvp:get(2, 3),
     matvp:get(3, 1), matvp:get(3, 2), matvp:get(3, 3),
-  }
-
-  -- view transformation
-  ---@type Matrix
-  local W = matrix.new(3, 3, table.unpack(matw))
+  })
 
   local T = W:mul(J)
-
   local cov3d = getcovariance3d(s)
-
   local cov2d = T:transpose():mul(cov3d):mul(T)
 
-  return cov2d, viewpos
+  return cov2d, vector.new(3, viewpos[1], viewpos[2], viewpos[3])
 end
 
 ---@param p Vector

@@ -9,7 +9,7 @@ local vector = require("structures.vector")
 local Splat = lang.newclass("Splat")
 
 function Splat:ctor()
-	self.position = vector.new(3, 0, 0, 8)
+	self.position = vector.new(3, 0, 0, 0)
 	self.rotation = quaternion.identity()
 	self.scale = vector.new(3, 1, 1, 1)
 end

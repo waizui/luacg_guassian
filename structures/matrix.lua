@@ -6,6 +6,9 @@ local Matrix = lang.newclass("Matrix")
 
 function Matrix:ctor(r, c, ...)
 	local args = { ... }
+	if #args == 1 then
+		args = args[1]
+	end
 	self.c = c
 	self.r = r
 	for i, v in ipairs(args) do
