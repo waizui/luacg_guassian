@@ -28,7 +28,7 @@ end
 local function getgaussian()
   ---@type Splat
   local s = splat.new()
-  s.position = vector.new(3, 0, 0, 0.3)
+  s.position = vector.new(3, 0, 0, 0.6)
   s.scale = vector.new(3, 1, 0.5, 1)
   local q = s.rotation
   -- rotate 45 degree around z axis
@@ -121,7 +121,7 @@ local function checkpixel(p, cov2d, ix, iy)
   local a, b, c = conic:get(1, 1), conic:get(1, 2), conic:get(2, 2)
   local dx, dy = ix - p[1], iy - p[2]
   -- ellipse equation
-  local v = a * dx * dx + 2 * b * dx * dy + c * dy * dy
+  local v = 0.5*( a * dx * dx + 2 * b * dx * dy + c * dy * dy)
 
   if v > 1 then
     return true
