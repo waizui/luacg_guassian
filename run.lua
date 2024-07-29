@@ -100,7 +100,7 @@ local function checkdiscard(p, cov2d, ix, iy)
   local x, y, z = cov2d:get(1, 1), cov2d:get(1, 2), cov2d:get(2, 2)
   local det = x * z - y * y
 
-  if det < 0 or ((det - 0) < 1e-6) then
+  if ((det - 0) < 1e-6) then
     return true
   end
 
@@ -110,14 +110,14 @@ local function checkdiscard(p, cov2d, ix, iy)
 
   -- stylua: ignore
   local inv_cov = {
-    -- todo: inverse
+    inv_det * cov2d:get(1, 1), inv_det * cov2d:get(2, 1),
+    inv_det * cov2d:get(1, 2), inv_det * cov2d:get(2, 2),
   }
 
   local conic = matrix.new(2, 2, table.unpack(inv_cov))
 
   --test circle
   -- local conic = matrix.new(2, 2, 2, 0, 0, 4)
-
 
   local a, b, c = conic:get(1, 1), conic:get(1, 2), conic:get(2, 2)
   local dx, dy = ix - p[1], iy - p[2]
@@ -141,7 +141,7 @@ local function rasterizesplat(s, w, h)
       local iy = (2 * (i - 1) + 1) / h - 1
 
       if checkdiscard({ 0, 0 }, cov2d, ix, iy) then
-        -- white background
+        -- background color
         buf[(h - i) * w + j] = { 0xFF, 0xFF, 0xFF }
         goto continue
       end
