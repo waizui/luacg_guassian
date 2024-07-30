@@ -23,15 +23,17 @@ local function writebuf(buf, w, h, fname)
   file:close()
 end
 
-
+-- make changes to propeties of Splat, you can get different results
 ---@return Splat
 local function getgaussian()
   ---@type Splat
   local s = splat.new()
+  -- away from camera's front at the distance of 1.7
   s.position = vector.new(3, 0, 0, -1.7)
+  -- like a squashed ball
   s.scale = vector.new(3, 1, 0.5, 1)
   local q = s.rotation
-  -- rotate 45 degree around z axis
+  -- rotate 45 degree around z axis, pre-calculated : https://waizui.github.io/a_glimpse_of_quaternion/a_glimpse_of_quaternion.html
   q.r = 0.9238
   q.i = 0
   q.j = 0
