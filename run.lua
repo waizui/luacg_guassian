@@ -88,9 +88,9 @@ local function getcovariance2d(s)
   -- view transformation, since the camera is perfectly aligned with x,y axes and facing towards z axis, only need filp z component.
   ---@type Matrix
   local W = matrix.new(3, 3, {
-    1,0,0,
-    0,1,0,
-    0,0,-1,
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, -1,
   })
 
   local T = W:mul(J)
@@ -158,8 +158,8 @@ local function rasterizesplat(s, w, h)
       end
 
       -- blending color
-      local color = vector.new(3, 0x26, 0x6B, 0x56) * weight
-      local bg = vector.new(3, 0xFF, 0xFF, 0xFF) * (1 - weight)
+      local color = vector.new(3, 0x26, 0x6B, 0x56) * weight * s.opacity
+      local bg = vector.new(3, 0xFF, 0xFF, 0xFF) * (1 - weight * s.opacity)
       color = color + bg
 
       buf[(h - i) * w + j] = { color[1], color[2], color[3] }
