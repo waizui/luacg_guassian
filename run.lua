@@ -85,12 +85,12 @@ local function getcovariance2d(s)
   })
 
   -- stylua: ignore
-  -- view transformation, since the camera is perfectly aligned with world axes, it will be an identity matrix
+  -- view transformation, since the camera is perfectly aligned with x,y axes and facing towards z axis, only need filp z component.
   ---@type Matrix
   local W = matrix.new(3, 3, {
     1,0,0,
     0,1,0,
-    0,0,1,
+    0,0,-1,
   })
 
   local T = W:mul(J)
