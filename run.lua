@@ -28,8 +28,8 @@ end
 local function getgaussian()
   ---@type Splat
   local s = splat.new()
-  -- away from camera's front at the distance of 1.7
-  s.position = vector.new(3, 0, 0, -1.7)
+  -- away from camera's front direction
+  s.position = vector.new(3, 0, 0, -0.8)
   -- like a squashed ball
   s.scale = vector.new(3, 1, 0.5, 1)
   local q = s.rotation
@@ -76,7 +76,7 @@ local function getcovariance2d(s)
   local focal, x, y, z = cam.near, viewpos[1], viewpos[2], viewpos[3]
 
   -- stylua: ignore
-  -- jaccobian
+  -- jaccobian of projection transformation
   ---@type Matrix
   local J = matrix.new(3, 3, {
     focal / z, 0, -(focal * x) / (z * z),
@@ -85,12 +85,12 @@ local function getcovariance2d(s)
   })
 
   -- stylua: ignore
-  -- view transformation
+  -- view transformation, since the camera is perfectly aligned with world axes, it will be an identity matrix
   ---@type Matrix
   local W = matrix.new(3, 3, {
-    matvp:get(1, 1), matvp:get(1, 2), matvp:get(1, 3),
-    matvp:get(2, 1), matvp:get(2, 2), matvp:get(2, 3),
-    matvp:get(3, 1), matvp:get(3, 2), matvp:get(3, 3),
+    1,0,0,
+    0,1,0,
+    0,0,1,
   })
 
   local T = W:mul(J)
